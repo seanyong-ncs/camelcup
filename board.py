@@ -91,21 +91,3 @@ class Board:
 
 
 
-        
-def main():
-    b = Board()
-    b.moveCamel(Color.ORANGE, 1)
-    b.moveCamel(Color.YELLOW, 2)
-    b.moveCamel(Color.BLUE, 3)
-    b.moveCamel(Color.WHITE, 2)
-    b.moveCamel(Color.GREEN, 3)
-    rankings = b.getCurrentRankings()
-    print(rankings)
-    b.printBoard()
-    print("Generated Board")
-
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
-    main()
-
-
