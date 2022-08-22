@@ -56,62 +56,47 @@ class Board:
             self.tiles[steps].camel_stack.append(camel)
             camel.position += steps
 
+    def getCurrentRankings(self):
+        occupied_tiles = [t for t in self.tiles if len(t.camel_stack) > 0]
+        rankings = []
+        for tile in occupied_tiles:
+            for camel in tile.camel_stack:
+                rankings.append(camel.color.value)
+        rankings.reverse()
+        return rankings
+
     def printBoard(self):
-        board_string = ""
-        positions_string = ""
-        divider_string = "".join(["-" for _ in range(3*num_tiles)])
+
         for i,t in enumerate(self.tiles):
+            line = ""
             if i == 0:
-                board_string += "S "
+                line += "S: "
             elif i == num_tiles:
-                board_string += "E"
+                line += "E: "
             else:
-                board_string += f"{i} "
+                line += f"{i}: "
             
             for c in t.camel_stack:
-                positions_string += f"{c.color.value}"
-            positions_string += ","
-    
-        print(board_string)
-        print(divider_string)
-        lines = self.printVertically(positions_string)
-
-        for line in self.printVertically(positions_string):
+                line += f"{c.color.value} "
             print(line)
 
-    def printVertically(self, s):
-      s = s.split(",")
-      x = []
-      row = 0
-      for i in s:
-         row = max(row, len(i))
-      col = len(s)
-      ans = ["" for i in range(row)]
-      j = 0
-      for i in range(col):
-         j = 0
-         while j < len(s[i]):
-            #print(j, i)
-            while i - len(ans[j]) >= 1:
-               ans[j] += "  "
-            ans[j] += s[i][j] + " "
-            j += 1
-      return ans
+
 
         
 def main():
     b = Board()
     b.moveCamel(Color.ORANGE, 1)
-    b.moveCamel(Color.GREEN, 1)
-    b.moveCamel(Color.YELLOW, 3)
-    b.moveCamel(Color.BLUE, 2)
+    b.moveCamel(Color.YELLOW, 2)
+    b.moveCamel(Color.BLUE, 3)
     b.moveCamel(Color.WHITE, 2)
-    b.moveCamel(Color.ORANGE, 2)
+    b.moveCamel(Color.GREEN, 3)
+    rankings = b.getCurrentRankings()
+    print(rankings)
     b.printBoard()
     print("Generated Board")
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
     main()
 
 
