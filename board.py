@@ -1,7 +1,7 @@
 from models.camel import Camel
 from models.properties import Color
-from models.player import Player
-from models.dice import Dice
+# from models.player import Player
+# from models.dice import Dice
 import logging
 import copy
 
@@ -16,18 +16,26 @@ class BoardTile:
 
 class Board:
     
-    def __init__(self):
-        logging.info("Creating Board")
+    def __init__(self, pos_dict=None):
+        logging.debug("Creating Board")
         # Add camels to the board
         self.camels = [Camel(c) for c in Color]
-        # Add players to the board
-        self.players = [Player(p) for p in range(num_players)]
-        # Add dice to the board
-        self.dices = [Dice(c) for c in Color]
+        # # Add players to the board
+        # self.players = [Player(p) for p in range(num_players)]
+        # # Add dice to the board
+        # self.dices = [Dice(c) for c in Color]
         # Add tiles to the board
         self.tiles = [BoardTile(n) for n in range(num_tiles + 1)]
 
         self.tiles[0].camel_stack = copy.copy(self.camels)
+
+        if pos_dict is not None:
+            self.setupFromDict(pos_dict)
+
+    def setupFromDict(self, pos_dict):
+        for key in pos_dict:
+            for camel in pos_dict[key]:
+                self.moveCamel(camel, key)
 
     
     def moveCamel(self, color, steps):
@@ -44,6 +52,7 @@ class Board:
             # Extend destination tile's stack with moving stack
             dest_tile = camel.position + steps
             self.tiles[dest_tile].camel_stack.extend(move_stack)
+
             # Reduce origin tile's stack 
             self.tiles[camel.position].camel_stack = cur_tile_stack[:stack_pos]
             # Update camel positions in the moving stack
@@ -77,7 +86,7 @@ class Board:
                 line += f"{i}: "
             
             for c in t.camel_stack:
-                line += f"{c.color.value} "
+                line += f"{c.color.name} "
             print(line)
 
 
