@@ -1,7 +1,5 @@
 from models.camel import Camel
 from models.properties import Color
-# from models.player import Player
-# from models.dice import Dice
 import logging
 import copy
 
@@ -12,7 +10,7 @@ class BoardTile:
     def __init__(self, pos):
         self.pos = pos 
         self.camel_stack = []
-        self.modifier_card = None
+        self.modifier = None # Either a +1 or -1
 
 class Board:
     
@@ -20,10 +18,6 @@ class Board:
         logging.debug("Creating Board")
         # Add camels to the board
         self.camels = [Camel(c) for c in Color]
-        # # Add players to the board
-        # self.players = [Player(p) for p in range(num_players)]
-        # # Add dice to the board
-        # self.dices = [Dice(c) for c in Color]
         # Add tiles to the board
         self.tiles = [BoardTile(n) for n in range(num_tiles + 1)]
 
@@ -37,6 +31,17 @@ class Board:
             for camel in pos_dict[key]:
                 self.moveCamel(camel, key)
 
+    def validateDict(self, pos_dict):
+        # Check if exactly 1 of each camel
+        check_list = [c for c in Color]
+        for key in pos_dict:
+            for c in pos_dict[key]:
+                    check_list.pop(check_list.index(c))
+
+        if len(check_list) == 0:
+            return True
+        else:
+            raise RuntimeError("Position Dictionary is not valid")
     
     def moveCamel(self, color, steps):
         camel = self.camels[color.value]
