@@ -66,12 +66,12 @@ def evCalculator(probabilities):
 
 if __name__ == "__main__":
 
-    color_list = [Color.WHITE, Color.YELLOW, Color.GREEN, Color.BLUE, Color.ORANGE]
+    color_list = [Color.YELLOW, Color.GREEN, Color.BLUE, Color.ORANGE]
 
     logging.basicConfig(level=logging.INFO)
-    pos_dict = {10: [Color.GREEN, Color.ORANGE], 11: [Color.BLUE], 13:[Color.YELLOW],14:[Color.WHITE]}
+    pos_dict = {10: [Color.GREEN, Color.ORANGE], 11: [Color.BLUE], 13:[Color.YELLOW],15:[Color.WHITE]}
     b = Board(pos_dict)
-    # b.printBoard()
+    b.printBoard()
     probabilities = simulateRound(color_list, pos_dict)
     # probabilities = simulateRound(pos_dict)
     evs = evCalculator(probabilities)
