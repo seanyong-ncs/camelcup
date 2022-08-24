@@ -8,7 +8,7 @@ import itertools
 # Takes in a dictionary of camel positions and a dictionary of tile modifiers
 # Returns a list of probabilities for each camel
 
-def simulateRound(color_move_list, pos_dict):
+def simulateRound(color_move_list, pos_dict, mod_dict=None):
 
     # Generate color move order permutations
     color_permutations = itertools.permutations(color_move_list)
@@ -23,7 +23,7 @@ def simulateRound(color_move_list, pos_dict):
         # Then loop through dice permutations
         for perm in dice_permutations:
             # Generate new board simulation for each color/dice pairing
-            b = Board(pos_dict) # Create new sim board
+            b = Board(pos_dict, mod_dict) # Create new sim board
             # Roll n number of times depending on number of camels moving this simulated round
             for i, dice_roll in enumerate(perm):
                 b.moveCamel(color_perm[i], dice_roll)
@@ -76,7 +76,7 @@ if __name__ == "__main__":
 
     b = Board(pos_dict)
     b.printBoard()
-    probabilities = simulateRound(color_list, pos_dict)
+    probabilities = simulateRound(color_list, pos_dict, mod_dict)
     evs = evCalculator(probabilities)
 
     print(probabilities)
