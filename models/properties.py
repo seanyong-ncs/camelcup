@@ -10,4 +10,5 @@ class Color(Enum):
 
 class TileMod(Enum):
     BOOST = 1
+    NEUTRAL = 0
     TRAP = -1

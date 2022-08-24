@@ -74,7 +74,7 @@ if __name__ == "__main__":
     # Dict of modifier locations
     mod_dict = {14: {TileMod.BOOST}}
 
-    b = Board(pos_dict)
+    b = Board(pos_dict, mod_dict)
     b.printBoard()
     probabilities = simulateRound(color_list, pos_dict, mod_dict)
     evs = evCalculator(probabilities)
