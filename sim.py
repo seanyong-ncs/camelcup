@@ -1,5 +1,5 @@
 from board import Board
-from models.properties import Color
+from models.properties import Color, TileMod
 import logging
 import itertools
 
@@ -65,15 +65,18 @@ def evCalculator(probabilities):
     return ev_all
 
 if __name__ == "__main__":
-
-    color_list = [Color.YELLOW, Color.GREEN, Color.BLUE, Color.ORANGE]
-
     logging.basicConfig(level=logging.INFO)
-    pos_dict = {10: [Color.GREEN, Color.ORANGE], 11: [Color.BLUE], 13:[Color.YELLOW],15:[Color.WHITE]}
+
+    # List of camels that can still move this round
+    color_list = [Color.YELLOW, Color.GREEN, Color.BLUE, Color.ORANGE] 
+    # Dict of camel positions
+    pos_dict = {10: [Color.GREEN, Color.ORANGE], 11: [Color.BLUE], 13:[Color.YELLOW], 15:[Color.WHITE]}
+    # Dict of modifier locations
+    mod_dict = {14: {TileMod.BOOST}}
+
     b = Board(pos_dict)
     b.printBoard()
     probabilities = simulateRound(color_list, pos_dict)
-    # probabilities = simulateRound(pos_dict)
     evs = evCalculator(probabilities)
 
     print(probabilities)

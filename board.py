@@ -1,5 +1,5 @@
 from models.camel import Camel
-from models.properties import Color
+from models.properties import Color, TileMod
 import logging
 import copy
 
@@ -14,7 +14,7 @@ class BoardTile:
 
 class Board:
     
-    def __init__(self, pos_dict=None):
+    def __init__(self, pos_dict=None, mod_dict=None):
         logging.debug("Creating Board")
         # Add camels to the board
         self.camels = [Camel(c) for c in Color]
@@ -24,25 +24,40 @@ class Board:
         self.tiles[0].camel_stack = copy.copy(self.camels)
 
         if pos_dict is not None:
-            self.setupFromDict(pos_dict)
+            self.setupFromDict(pos_dict, mod_dict)
 
-    def setupFromDict(self, pos_dict):
+    def setupFromDict(self, pos_dict, mod_dict):
+        # Set up camels from pos_dict
         for key in pos_dict:
             for camel in pos_dict[key]:
                 self.moveCamel(camel, key)
+        
+        # Set up traps/boost tiles from mod_dict
+        for key in mod_dict:
+            for mod in mod_dict[key]:
+                self.tiles[key].modifier = mod.value
 
-    def validateDict(self, pos_dict):
+    def validateDict(self, pos_dict, mod_dict=None):
         # Check if exactly 1 of each camel
         check_list = [c for c in Color]
         for key in pos_dict:
             for c in pos_dict[key]:
                     check_list.pop(check_list.index(c))
 
+        if mod_dict:
+            # Todo: enforce mod tile placement validation
+            # 1. Check if mod tile is on camel occupied tiles
+            # 2. Check if mod tile is directly adjacent to an another mod tile
+            pass
+
         if len(check_list) == 0:
             return True
         else:
-            raise RuntimeError("Position Dictionary is not valid")
+            raise RuntimeError("configuration is not valid")
     
+        
+
+
     def moveCamel(self, color, steps):
         camel = self.camels[color.value]
         initial_move = True if camel.position == 0 else False
@@ -55,8 +70,17 @@ class Board:
             # Slice stack at camel position
             move_stack = cur_tile_stack[stack_pos:]
             # Extend destination tile's stack with moving stack
-            dest_tile = camel.position + steps
-            self.tiles[dest_tile].camel_stack.extend(move_stack)
+            dest_tile_idx = camel.position + steps
+
+            # if modifier is a trap
+            if self.tiles[dest_tile_idx].modifier == -1:
+                dest_tile_idx -= 1
+                self.tiles[dest_tile_idx].camel_stack[:0] = move_stack # Prepend stack 
+            # if modifier is a bost
+            else: # if modifier is None or 1
+                if self.tiles[dest_tile_idx].modifier == 1:
+                    dest_tile_idx += 1
+                self.tiles[dest_tile_idx].camel_stack.extend(move_stack)
 
             # Reduce origin tile's stack 
             self.tiles[camel.position].camel_stack = cur_tile_stack[:stack_pos]

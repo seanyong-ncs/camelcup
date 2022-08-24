@@ -7,3 +7,7 @@ class Color(Enum):
     ORANGE = 2
     YELLOW = 3
     WHITE = 4
+
+class TileMod(Enum):
+    BOOST = 1
+    TRAP = -1
