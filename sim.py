@@ -1,6 +1,5 @@
 from board import Board
-from models.properties import Color, TileMod, BettingCards
-import logging
+from models.properties import Color, BettingCards
 import itertools
 import numpy as np
 

@@ -1,5 +1,4 @@
 from enum import Enum
-import logging
 
 class Color(Enum):
     BLUE = 0
