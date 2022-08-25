@@ -79,8 +79,7 @@ class Board:
             # Calculate stack landing position based on tile modifiers
             dest_tile_idx += mod_step.value
 
-            # Todo: Add a check to see if the destination is the same as origin in the case of trap tile
-            # 1. Resolve out of list bug
+            self.tiles[camel.position].camel_stack = cur_tile_stack[:stack_pos]
 
             # if modifier is a trap
             if mod_step == TileMod.TRAP:
@@ -89,8 +88,7 @@ class Board:
             else: 
                 self.tiles[dest_tile_idx].camel_stack.extend(move_stack) # Extend stack
 
-            # Reduce origin tile's stack 
-            self.tiles[camel.position].camel_stack = cur_tile_stack[:stack_pos]
+            
             # Update camel positions in the moving stack
             for c in move_stack:
                 c.position += (steps + mod_step.value)
