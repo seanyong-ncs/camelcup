@@ -3,8 +3,6 @@ from models.properties import Color, TileMod
 import logging
 import copy
 
-num_players = 2
-num_tiles = 32
 
 class BoardTile:
     def __init__(self, pos):
@@ -13,13 +11,15 @@ class BoardTile:
         self.modifier = TileMod.NEUTRAL # Either a +1 or -1
 
 class Board:
+
+    num_tiles = 32 # Number of tiles a race has
     
     def __init__(self, pos_dict=None, mod_dict=None):
         logging.debug("Creating Board")
         # Add camels to the board
         self.camels = [Camel(c) for c in Color]
         # Add tiles to the board
-        self.tiles = [BoardTile(n) for n in range(num_tiles + 1)]
+        self.tiles = [BoardTile(n) for n in range(Board.num_tiles + 1)] # Add one for the finish tile
 
         self.tiles[0].camel_stack = copy.copy(self.camels)
 
@@ -71,24 +71,29 @@ class Board:
 
             # Slice stack at camel position
             move_stack = cur_tile_stack[stack_pos:]
-            # Extend destination tile's stack with moving stack
             
+            # Calculate the destination tile position after making steps
             dest_tile_idx = camel.position + steps 
+            # Don't allow the camel to move beyond last tile
+            if dest_tile_idx > Board.num_tiles:
+                dest_tile_idx = Board.num_tiles 
+
             mod_step = self.tiles[dest_tile_idx].modifier
 
             # Calculate stack landing position based on tile modifiers
             dest_tile_idx += mod_step.value
 
+            # Reduce origin camel stack before modifying destination stack
             self.tiles[camel.position].camel_stack = cur_tile_stack[:stack_pos]
 
-            # if modifier is a trap
+            # Augment destination tile's stack with moving stack
+            # if last step modifier is a trap
             if mod_step == TileMod.TRAP:
                 self.tiles[dest_tile_idx].camel_stack[:0] = move_stack # Prepend stack 
-            # if modifier is a boost
+            # else boost
             else: 
                 self.tiles[dest_tile_idx].camel_stack.extend(move_stack) # Extend stack
 
-            
             # Update camel positions in the moving stack
             for c in move_stack:
                 c.position += (steps + mod_step.value)
@@ -117,7 +122,7 @@ class Board:
                 mod = f"[{t.modifier.name} {t.modifier.value}]"
             if i == 0:
                 line += "S: "
-            elif i == num_tiles:
+            elif i == Board.num_tiles:
                 line += "E: "
             else:
                 line += f"{i}: "
