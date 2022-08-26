@@ -1,10 +1,13 @@
 # bot.py
+import collections
 import os
 import sim
 import discord
 from dotenv import load_dotenv
 from models.properties import *
 import re
+import numpy as np
+import copy
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -22,44 +25,115 @@ async def on_ready():
 async def on_message(message):
 
     if message.content.startswith("!ev"):
-        color_list, pos_dict = parseMessage(message.content)
-        mod_dict = {}
-        rs = sim.RoundSimulator(color_list, pos_dict, mod_dict)
+        color_list, pos_dict, mod_dict = parseMessage(message.content)
+        await message.channel.send("Interpretation of input:")
+        stack_string, pos_subtitle = boardDisplay(color_list, pos_dict, mod_dict)
+        await message.channel.send(stack_string)
+        await message.channel.send(pos_subtitle)
 
+        rs = sim.RoundSimulator(color_list, pos_dict, mod_dict)
         probabilities = rs.simulateRound()
         evs = rs.calculateEV()
-        await message.channel.send(probabilities)
-        await message.channel.send(evs)
+        embed = formatResults(message, probabilities, evs)
+        
+        await message.channel.send(embed=embed)
+
+def boardDisplay(color_list, pos_dict, mod_dict):
+    max_height = 0
+
+    # Find the maximum height for blank spaces
+    for key in pos_dict:
+        list_len = len(pos_dict[key])
+        if list_len > max_height:
+            max_height = list_len
+    
+    all_rows = []
+    unified_dict = {**pos_dict,**mod_dict}
+    od = collections.OrderedDict(sorted(unified_dict.items()))
+    for k, v in od.items():
+        v = [v] if not isinstance(v, list) else v
+        row = [ColorTile.BLACK for _ in range(max_height - len(v))]
+        vr = copy.copy(v)
+        vr.reverse()
+        row.extend([ColorTile[e.name] for e in vr])
+        all_rows.append(row)
+
+    all_rows_T = np.array(all_rows).T.tolist()
+
+    stack_string = ""
+    for row in all_rows_T:
+        cur_string = ""
+        for element in row:
+            cur_string += element.value
+
+        stack_string = stack_string + cur_string + "\n"
+
+    pos_subtitle = ".     "
+    for k, v in od.items():
+        pos_subtitle += f"**{k}**         {' ' if k < 9 or k%2 else ''}"
+
+    return stack_string, pos_subtitle
+
+
+def fieldBuilder(p, ev):
+    message = "**Probabilities**\n"
+    message += f"1st:        {round(p[1]*100, 2)}%\n"
+    message += f"2nd:        {round(p[2]*100, 2)}%\n"
+    message += f"3-5th:      {round(p[3]*100, 2)}%\n\n"
+    message += "**Expected Values**\n"
+    message += f"5:           ${ev[1]}\n"
+    message += f"3:           ${ev[2]}\n"
+    message += f"2:           ${ev[3]}\n"
+    return message
+
+def formatResults(message, probabilities, evs):
+    embed = discord.Embed(title="🐪🏆 EV Results", 
+            description=f"Based on the results provided from {message.content}", 
+            color=0xffffff)
+
+    emoji_header = ['🥇', '🥈', '🥉', '😞', '😵']
+
+    for p, ev, em in zip(probabilities, evs, emoji_header):
+        embed.add_field(name=f"{em} {ColorTile[p[0]].value} {p[0]}", value=f"{fieldBuilder(p, ev)}", inline=True)
+
+    return embed
+
 
 def parseMessage(message):
-    message = message.replace('!ev ', '')
+    message = message.replace('!ev ', '').lower()
+
 
     tokens = message.split(" ")
     tokens.reverse()
 
-    if len(tokens) != 5:
-        print("invalid input")
-        return False
+    # if len(tokens) != 5:
+    #     print("invalid input")
+    #     return False
 
-    char_mapping = {"b": Color.BLUE, "g": Color.GREEN, "o": Color.ORANGE, "y": Color.YELLOW, "w": Color.WHITE}
+    camel_map = {"b": Color.BLUE, "g": Color.GREEN, "o": Color.ORANGE, "y": Color.YELLOW, "w": Color.WHITE}
+    tile_map = {"+": TileMod.BOOST, "-": TileMod.TRAP}
+
     pos_dict = {}
+    mod_dict = {}
     color_list = []
     for t in tokens:
         try:
-            camel = char_mapping[t[0]]
             pos = int(re.findall(r'\d+', t)[0])
-            if t[-1] != 'x':
-                color_list.append(camel)
+            if t[0] in camel_map:
+                camel = camel_map[t[0]]
+                if t[-1] != 'x':
+                    color_list.append(camel)
 
-            if pos in pos_dict:
-                pos_dict[pos].append(camel)
-            else:
-                pos_dict[pos] = [camel]
-            
+                if pos in pos_dict:
+                    pos_dict[pos].append(camel)
+                else:
+                    pos_dict[pos] = [camel]
+            elif t[0] in tile_map:
+                mod_dict[pos] = tile_map[t[0]]
         except:
             print("You mostly likely entered something wrong... please try again")
             return False
 
-    return color_list, pos_dict
+    return color_list, pos_dict, mod_dict
 
 client.run(TOKEN)

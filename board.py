@@ -36,8 +36,7 @@ class Board:
         if mod_dict:
             # Set up traps/boost tiles from mod_dict
             for key in mod_dict:
-                for mod in mod_dict[key]:
-                    self.tiles[key].modifier = mod
+                self.tiles[key].modifier = mod_dict[key]
 
     def validateDict(self, pos_dict, mod_dict=None):
         # Check if exactly 1 of each camel

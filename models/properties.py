@@ -7,6 +7,16 @@ class Color(Enum):
     YELLOW = 3
     WHITE = 4
 
+class ColorTile(Enum):
+    BLUE = ":blue_square:"
+    GREEN = ":green_square:"
+    ORANGE = ":orange_square:"
+    YELLOW = ":yellow_square:"
+    WHITE = ":white_large_square:"
+    BLACK = ":black_large_square:"
+    BOOST = ":arrow_right:"
+    TRAP = ":mouse_trap:"
+
 class TileMod(Enum):
     BOOST = 1
     NEUTRAL = 0

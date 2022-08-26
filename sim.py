@@ -54,9 +54,9 @@ class RoundSimulator():
 
             # Calculate wining probabilities
             denominator = sum(outcomes)
-            first_place = round(outcomes[0]/denominator, 3)
-            second_place = round(outcomes[1]/denominator, 3)
-            other_places = round((outcomes[2] + outcomes[3] + outcomes[4])/denominator, 3)
+            first_place = round(outcomes[0]/denominator, 4)
+            second_place = round(outcomes[1]/denominator, 4)
+            other_places = round((outcomes[2] + outcomes[3] + outcomes[4])/denominator, 4)
 
             # Results are formated as ["Camel_color", "1st_probability", "2nd_probability", "3rd-5th_probability"]
             pos_probabilities.append([c.name, first_place, second_place, other_places])
