@@ -27,14 +27,15 @@ async def on_message(message):
     if message.content.startswith("!ev"):
         color_list, pos_dict, mod_dict = parseMessage(message.content)
         await message.channel.send("Interpretation of input:")
-        stack_string, pos_subtitle = boardDisplay(color_list, pos_dict, mod_dict)
+        stack_string, pos_subtitle, move_string = boardDisplay(color_list, pos_dict, mod_dict)
         await message.channel.send(stack_string)
         await message.channel.send(pos_subtitle)
+        await message.channel.send(move_string)
 
         rs = sim.RoundSimulator(color_list, pos_dict, mod_dict)
         probabilities = rs.simulateRound()
         evs = rs.calculateEV()
-        embed = formatResults(message, probabilities, evs)
+        embed = createEmbed(message, probabilities, evs)
         
         await message.channel.send(embed=embed)
 
@@ -47,6 +48,8 @@ def boardDisplay(color_list, pos_dict, mod_dict):
         if list_len > max_height:
             max_height = list_len
     
+
+    # Construct Emoji based camel stack representation
     all_rows = []
     unified_dict = {**pos_dict,**mod_dict}
     od = collections.OrderedDict(sorted(unified_dict.items()))
@@ -58,21 +61,28 @@ def boardDisplay(color_list, pos_dict, mod_dict):
         row.extend([ColorTile[e.name] for e in vr])
         all_rows.append(row)
 
+    # Transpose 2D list to print vertically
     all_rows_T = np.array(all_rows).T.tolist()
 
+    # Concatinate into a single message
     stack_string = ""
     for row in all_rows_T:
         cur_string = ""
         for element in row:
             cur_string += element.value
-
         stack_string = stack_string + cur_string + "\n"
 
+    # Add the subtitle for the stack positions
     pos_subtitle = ".     "
     for k, v in od.items():
         pos_subtitle += f"**{k}**         {' ' if k < 9 or k%2 else ''}"
 
-    return stack_string, pos_subtitle
+    # Create the section for showing camels that can and cannot move
+    
+    move_string = '✅ Can Move:       ' + ''.join(f'{ColorTile[c.name].value}' for c in color_list) + '\n' + \
+                  "❌ Cannot Move:    " + ''.join(f'{ColorTile[c.name].value}' for c in list(set(color_list) ^ set(Color)))
+
+    return stack_string, pos_subtitle, move_string
 
 
 def fieldBuilder(p, ev):
@@ -86,7 +96,7 @@ def fieldBuilder(p, ev):
     message += f"2:           ${ev[3]}\n"
     return message
 
-def formatResults(message, probabilities, evs):
+def createEmbed(message, probabilities, evs):
     embed = discord.Embed(title="🐪🏆 EV Results", 
             description=f"Based on the results provided from {message.content}", 
             color=0xffffff)
