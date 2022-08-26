@@ -26,7 +26,6 @@ async def on_message(message):
 
     if message.content.startswith("!ev"):
         color_list, pos_dict, mod_dict = parseMessage(message.content)
-        await message.channel.send("Interpretation of input:")
         stack_string, pos_subtitle, move_string = boardDisplay(color_list, pos_dict, mod_dict)
         await message.channel.send(stack_string)
         await message.channel.send(pos_subtitle)
@@ -86,14 +85,17 @@ def boardDisplay(color_list, pos_dict, mod_dict):
 
 
 def fieldBuilder(p, ev):
-    message = "**Probabilities**\n"
+    hl = lambda x: "__" if x >= 1 else ""
+
+    message = "**Expected Values**\n"
+    message += f"{hl(ev[1])}5:           ${ev[1]}{hl(ev[1])}\n"
+    message += f"{hl(ev[2])}3:           ${ev[2]}{hl(ev[2])}\n"
+    message += f"{hl(ev[3])}2:           ${ev[3]}{hl(ev[3])}\n"
+    message += "**Probabilities**\n"
     message += f"1st:        {round(p[1]*100, 2)}%\n"
     message += f"2nd:        {round(p[2]*100, 2)}%\n"
     message += f"3-5th:      {round(p[3]*100, 2)}%\n\n"
-    message += "**Expected Values**\n"
-    message += f"5:           ${ev[1]}\n"
-    message += f"3:           ${ev[2]}\n"
-    message += f"2:           ${ev[3]}\n"
+    
     return message
 
 def createEmbed(message, probabilities, evs):
