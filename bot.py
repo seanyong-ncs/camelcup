@@ -8,6 +8,7 @@ from models.properties import *
 import re
 import numpy as np
 import copy
+from render import render_board
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -17,28 +18,32 @@ intents.message_content = True
 
 client = discord.Client(intents=intents)
 
+
+
 @client.event
 async def on_ready():
     print(f'{client.user} has connected to Discord!')
 
 @client.event
 async def on_message(message):
-
     if message.content.startswith("!ev"):
         color_list, pos_dict, mod_dict = parseMessage(message.content)
-        stack_string, pos_subtitle, move_string = boardDisplay(color_list, pos_dict, mod_dict)
-        await message.channel.send(stack_string)
-        await message.channel.send(pos_subtitle)
-        await message.channel.send(move_string)
+        render_board(color_list, pos_dict, mod_dict)
+        await message.channel.send(file=discord.File('screenshot.jpg'))
+        # stack_string, pos_subtitle, move_string = boardDisplay(color_list, pos_dict, mod_dict)
+        # await message.channel.send(stack_string)
+        # await message.channel.send(pos_subtitle)
+        # await message.channel.send(move_string)
 
         rs = sim.RoundSimulator(color_list, pos_dict, mod_dict)
-        probabilities = rs.simulateRound()
-        evs = rs.calculateEV()
-        embed = createEmbed(message, probabilities, evs)
+        probabilities = rs.sim_round()
+        evs = rs.calculate_ev()
+        embed = create_embed(message, probabilities, evs)
         
         await message.channel.send(embed=embed)
 
-def boardDisplay(color_list, pos_dict, mod_dict):
+def board_preview(color_list, pos_dict, mod_dict):
+    
     max_height = 0
 
     # Find the maximum height for blank spaces
@@ -84,21 +89,23 @@ def boardDisplay(color_list, pos_dict, mod_dict):
     return stack_string, pos_subtitle, move_string
 
 
-def fieldBuilder(p, ev):
-    hl = lambda x: "__" if x >= 1 else ""
 
-    message = "**Expected Values**\n"
-    message += f"{hl(ev[1])}5:           ${ev[1]}{hl(ev[1])}\n"
-    message += f"{hl(ev[2])}3:           ${ev[2]}{hl(ev[2])}\n"
-    message += f"{hl(ev[3])}2:           ${ev[3]}{hl(ev[3])}\n"
-    message += "**Probabilities**\n"
-    message += f"1st:        {round(p[1]*100, 2)}%\n"
-    message += f"2nd:        {round(p[2]*100, 2)}%\n"
-    message += f"3-5th:      {round(p[3]*100, 2)}%\n\n"
-    
-    return message
 
-def createEmbed(message, probabilities, evs):
+def create_embed(message, probabilities, evs):
+
+    # Build embed field message
+    def embed_field(p, ev):
+        def hl(x): return "__" if x >= 1 else ""
+        message = "**Expected Values**\n"
+        message += f"{hl(ev[1])}5:           ${ev[1]}{hl(ev[1])}\n"
+        message += f"{hl(ev[2])}3:           ${ev[2]}{hl(ev[2])}\n"
+        message += f"{hl(ev[3])}2:           ${ev[3]}{hl(ev[3])}\n"
+        message += "**Probabilities**\n"
+        message += f"1st:        {round(p[1]*100, 2)}%\n"
+        message += f"2nd:        {round(p[2]*100, 2)}%\n"
+        message += f"3-5th:      {round(p[3]*100, 2)}%\n\n"
+        return message
+
     embed = discord.Embed(title="🐪🏆 EV Results", 
             description=f"Based on the results provided from {message.content}", 
             color=0xffffff)
@@ -106,7 +113,7 @@ def createEmbed(message, probabilities, evs):
     emoji_header = ['🥇', '🥈', '🥉', '😞', '😵']
 
     for p, ev, em in zip(probabilities, evs, emoji_header):
-        embed.add_field(name=f"{em} {ColorTile[p[0]].value} {p[0]}", value=f"{fieldBuilder(p, ev)}", inline=True)
+        embed.add_field(name=f"{em} {ColorTile[p[0]].value} {p[0]}", value=f"{embed_field(p, ev)}", inline=True)
 
     return embed
 
@@ -114,13 +121,8 @@ def createEmbed(message, probabilities, evs):
 def parseMessage(message):
     message = message.replace('!ev ', '').lower()
 
-
     tokens = message.split(" ")
     tokens.reverse()
-
-    # if len(tokens) != 5:
-    #     print("invalid input")
-    #     return False
 
     camel_map = {"b": Color.BLUE, "g": Color.GREEN, "o": Color.ORANGE, "y": Color.YELLOW, "w": Color.WHITE}
     tile_map = {"+": TileMod.BOOST, "-": TileMod.TRAP}

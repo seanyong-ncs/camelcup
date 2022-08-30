@@ -10,6 +10,7 @@ class BoardTile:
         self.camel_stack = []
         self.modifier = TileMod.NEUTRAL # Either a +1 or -1
 
+
 class Board:
 
     num_tiles = 32 # Number of tiles a race has
@@ -24,13 +25,13 @@ class Board:
         self.tiles[0].camel_stack = copy.copy(self.camels)
 
         if pos_dict is not None:
-            self.setupFromDict(pos_dict, mod_dict)
+            self.dict_setup(pos_dict, mod_dict)
 
-    def setupFromDict(self, pos_dict, mod_dict):
+    def dict_setup(self, pos_dict, mod_dict):
         # Set up camels from pos_dict
         for key in pos_dict:
             for camel in pos_dict[key]:
-                self.moveCamel(camel, key)
+                self.move_camel(camel, key)
         
         # Check if mod_dict is not None since there can be no mod tiles
         if mod_dict:
@@ -38,7 +39,7 @@ class Board:
             for key in mod_dict:
                 self.tiles[key].modifier = mod_dict[key]
 
-    def validateDict(self, pos_dict, mod_dict=None):
+    def dict_validate(self, pos_dict, mod_dict=None):
         # Check if exactly 1 of each camel
         check_list = [c for c in Color]
         for key in pos_dict:
@@ -59,7 +60,7 @@ class Board:
         
 
 
-    def moveCamel(self, color, steps):
+    def move_camel(self, color, steps):
         camel = self.camels[color.value]
         initial_move = True if camel.position == 0 else False
 
@@ -103,7 +104,7 @@ class Board:
             self.tiles[steps].camel_stack.append(camel)
             camel.position += steps
 
-    def getCurrentRankings(self):
+    def current_rankings(self):
         occupied_tiles = [t for t in self.tiles if len(t.camel_stack) > 0]
         rankings = []
         for tile in occupied_tiles:
@@ -112,7 +113,7 @@ class Board:
         rankings.reverse()
         return rankings
 
-    def printBoard(self):
+    def print_board(self):
 
         for i,t in enumerate(self.tiles):
             line = ""

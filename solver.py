@@ -3,7 +3,7 @@ import logging
 from models.properties import *
 import re
 
-def printHeader():
+def print_header():
     header = [
     "   _____                     _  _____              ________      __   _____       _                ",
     "  / ____|                   | |/ ____|            |  ____\ \    / /  / ____|     | |               ",
@@ -16,7 +16,7 @@ def printHeader():
     ]
     print(*header, sep = "\n")
 
-def getUserInput():
+def get_user_input():
     user_input = input("Enter camel positions:")
     tokens = user_input.split(" ")
     tokens.reverse()
@@ -57,16 +57,16 @@ if __name__ == "__main__":
     mod_dict = {14: {TileMod.BOOST}, 12: {TileMod.BOOST}}
 
 
-    printHeader()
+    print_header()
 
     print("Input format: \"[Color][Pos][Cannot Move] [Color][Pos][Cannot Move] .... \"")
     # color_list, pos_dict = getUserInput()
     # mod_dict = {}
 
     rs = sim.RoundSimulator(color_list, pos_dict, mod_dict)
-    rs.printBoard()
-    probabilities = rs.simulateRound()
-    evs = rs.calculateEV()
+    rs.print_board()
+    probabilities = rs.sim_round()
+    evs = rs.calculate_ev()
 
     print(probabilities)
     print(evs)

@@ -8,23 +8,23 @@ import numpy as np
 class RoundSimulator():
 
     def __init__(self, color_move_list=None, pos_dict=None, mod_dict=None):
-        self.updateBoard(color_move_list, pos_dict, mod_dict)
+        self.update_board(color_move_list, pos_dict, mod_dict)
         self.pos_probabilities = None
 
-    def updateBoard(self, color_move_list=None, pos_dict=None, mod_dict=None):
+    def update_board(self, color_move_list=None, pos_dict=None, mod_dict=None):
         self.color_move_list = color_move_list
         self.pos_dict = pos_dict
         self.mod_dict = mod_dict
 
-    def printBoard(self):
+    def print_board(self):
         b = Board(self.pos_dict, self.mod_dict)
-        b.printBoard()
+        b.print_board()
 
     # simulateRound(list, dict, dict) -> list of results
     # Takes in a list of camels to move, a dictionary of camel positions, and a dictionary of tile modifiers
     # Returns a list of probabilities for each camel
 
-    def simulateRound(self):
+    def sim_round(self):
 
         # Generate color move order permutations
         color_permutations = itertools.permutations(self.color_move_list)
@@ -42,8 +42,8 @@ class RoundSimulator():
                 b = Board(self.pos_dict, self.mod_dict) # Create new sim board
                 # Roll n number of times depending on number of camels moving this simulated round
                 for i, dice_roll in enumerate(perm):
-                    b.moveCamel(color_perm[i], dice_roll)
-                results.append(b.getCurrentRankings()) # Save results to list and run analysis later
+                    b.move_camel(color_perm[i], dice_roll)
+                results.append(b.current_rankings()) # Save results to list and run analysis later
 
 
         pos_probabilities = []
@@ -68,7 +68,7 @@ class RoundSimulator():
         return pos_probabilities
 
 
-    def calculateEV(self):
+    def calculate_ev(self):
 
         ev_all = []
         for p in self.pos_probabilities:
