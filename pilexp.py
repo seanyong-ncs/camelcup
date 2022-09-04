@@ -1,11 +1,12 @@
-from PIL import Image, ImageOps
+from PIL import Image, ImageOps, ImageDraw,ImageFont 
 
-screen_h, screen_w = 124, 160
+
+screen_h, screen_w = 150, 170
 tile_h, tile_w = 16, 32
 camel_h = 16
-offset = 13
+offset = 0
 
-canvas = Image.new("RGBA", (screen_w, screen_h), (228, 210, 170))
+canvas = Image.new("RGBA", (screen_w, screen_h), (121, 103, 85))
 tile = Image.open("graphics/sprites/floor/32x32/floortile.png")
 
 def tile_iso(i, j):
@@ -75,48 +76,53 @@ def draw_mod(mod_type, pos):
     canvas.alpha_composite(mod_sprite, iso_mod(i, j, 0))
 
 def draw_cards():
-    b5 = Image.open(f"graphics/sprites/bets/bet_blue_5.png")
-    g5 = Image.open(f"graphics/sprites/bets/bet_green_5.png")
-    o5 = Image.open(f"graphics/sprites/bets/bet_orange_5.png")
-    w5 = Image.open(f"graphics/sprites/bets/bet_white_5.png")
-    y5 = Image.open(f"graphics/sprites/bets/bet_yellow_5.png")
-    canvas.alpha_composite(b5, (1, 2))
-    canvas.alpha_composite(g5, (17, 2))
-    canvas.alpha_composite(o5, (34, 2))
-    canvas.alpha_composite(w5, (51, 2))
-    canvas.alpha_composite(y5, (68, 2))
+    b = Image.open(f"graphics/sprites/bets/bet_blue_5.png")
+    g = Image.open(f"graphics/sprites/bets/bet_green_5.png")
+    o = Image.open(f"graphics/sprites/bets/bet_orange_3.png")
+    w = Image.open(f"graphics/sprites/bets/bet_white_2.png")
+    y = Image.open(f"graphics/sprites/bets/bet_yellow_2.png")
+    canvas.alpha_composite(b, (1, 125))
+    canvas.alpha_composite(g, (17, 125))
+    canvas.alpha_composite(o, (34, 125))
+    canvas.alpha_composite(w, (51, 125))
+    canvas.alpha_composite(y, (68, 125))
     
 
 
 draw_board(tile)
 
 
-# draw_camel("blue", 14, 2)
+draw_camel("blue", 14, 2)
 
-# draw_camel("green", 14, 1)
-# draw_camel("yellow", 14, 0 )
+draw_camel("green", 14, 1)
+draw_camel("yellow", 14, 0 )
 
-# draw_camel("white", 16, 1)
-# draw_camel("orange", 16)
+draw_camel("white", 16, 1)
+draw_camel("orange", 16)
 
-# draw_mod("boost", 15)
-# draw_mod("boost", 13)
-# draw_mod("trap", 1)
+draw_mod("boost", 15)
+draw_mod("boost", 13)
+draw_mod("trap", 1)
 
-for i in range(17):
-    draw_camel("blue", i, 4)
 
-    draw_camel("green", i, 3)
-    draw_camel("yellow", i, 2 )
-
-    draw_camel("white", i, 1)
-    draw_camel("orange", i)
 
 draw_cards()
 
 
 
+
+
+
 sf = 4
 canvas = canvas.resize((screen_w * sf, screen_h * sf), resample=Image.Resampling.BOX)
+font = ImageFont.truetype("slkscr.ttf", 28)
+ImageDraw.Draw(
+    canvas  # Image
+).text(
+    (10, 460),  # Coordinates
+    'Bet Cards Available:',  # Text
+    (255, 255, 255),  # Color,
+    font=font
+)
 
 canvas.show()
