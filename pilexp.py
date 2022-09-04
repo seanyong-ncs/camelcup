@@ -1,12 +1,12 @@
 from PIL import Image, ImageOps
 
-screen_h, screen_w = 112, 160
+screen_h, screen_w = 124, 160
 tile_h, tile_w = 16, 32
 camel_h = 16
-offset = 1
+offset = 13
 
 canvas = Image.new("RGBA", (screen_w, screen_h), (228, 210, 170))
-tile = Image.open("graphics/tilealt.png")
+tile = Image.open("graphics/sprites/floor/32x32/floortile.png")
 
 def tile_iso(i, j):
     x = i*0.5*tile_w + j*-0.5*tile_w + (screen_w/2 - tile_w/2)
@@ -49,19 +49,20 @@ def draw_camel(color, pos, height=0):
     if pos != 0:
         pos = (pos + 1) % 16 # Offset starting position
     
-    flip = "_flip" if pos >= 8 else ""
-    camel_sprite = Image.open(f"graphics/camel16x16_{color}.png")
+    flip = "_flip" if pos >= 12 or pos < 4 else ""
+    camel_sprite = Image.open(f"graphics/sprites/camels/16x16/camel_{color}{flip}.png")
     i, j = pos_to_iso(pos)
-    if (pos >= 0 and pos < 4) or pos >= 12:
-        canvas.alpha_composite(ImageOps.mirror(camel_sprite), iso_camel(i, j, height))
-    else:
-        canvas.alpha_composite(camel_sprite, iso_camel(i, j, height))
+    # if (pos >= 0 and pos < 4) or pos >= 12:
+    #     canvas.alpha_composite(ImageOps.mirror(camel_sprite), iso_camel(i, j, height))
+    # else:
+    #     canvas.alpha_composite(camel_sprite, iso_camel(i, j, height))
+    canvas.alpha_composite(camel_sprite, iso_camel(i, j, height))
 
 def draw_mod(mod_type, pos):
     if pos != 0:
         pos = (pos + 1) % 16 # Offset starting position
     orientation = "_up" if pos >= 8 else "_down" 
-    mod_sprite = Image.open(f"graphics/{mod_type}{orientation}_16x16.png")
+    mod_sprite = Image.open(f"graphics/sprites/modifiers/16x16/{mod_type}{orientation}.png")
     width, height = mod_sprite.size
 
     scale_factor = 1
@@ -73,24 +74,47 @@ def draw_mod(mod_type, pos):
         
     canvas.alpha_composite(mod_sprite, iso_mod(i, j, 0))
 
+def draw_cards():
+    b5 = Image.open(f"graphics/sprites/bets/bet_blue_5.png")
+    g5 = Image.open(f"graphics/sprites/bets/bet_green_5.png")
+    o5 = Image.open(f"graphics/sprites/bets/bet_orange_5.png")
+    w5 = Image.open(f"graphics/sprites/bets/bet_white_5.png")
+    y5 = Image.open(f"graphics/sprites/bets/bet_yellow_5.png")
+    canvas.alpha_composite(b5, (1, 2))
+    canvas.alpha_composite(g5, (17, 2))
+    canvas.alpha_composite(o5, (34, 2))
+    canvas.alpha_composite(w5, (51, 2))
+    canvas.alpha_composite(y5, (68, 2))
+    
+
 
 draw_board(tile)
 
 
-draw_camel("blue", 14, 2)
+# draw_camel("blue", 14, 2)
 
-draw_camel("green", 14, 1)
-draw_camel("yellow", 14, 0 )
+# draw_camel("green", 14, 1)
+# draw_camel("yellow", 14, 0 )
 
-draw_camel("white", 16, 1)
-draw_camel("orange", 16)
+# draw_camel("white", 16, 1)
+# draw_camel("orange", 16)
 
-draw_mod("boost", 15)
-draw_mod("boost", 13)
-draw_mod("boost", 1)
+# draw_mod("boost", 15)
+# draw_mod("boost", 13)
+# draw_mod("trap", 1)
 
-# for i in range(16):
-#     draw_mod("boost", i)
+for i in range(17):
+    draw_camel("blue", i, 4)
+
+    draw_camel("green", i, 3)
+    draw_camel("yellow", i, 2 )
+
+    draw_camel("white", i, 1)
+    draw_camel("orange", i)
+
+draw_cards()
+
+
 
 sf = 4
 canvas = canvas.resize((screen_w * sf, screen_h * sf), resample=Image.Resampling.BOX)
